@@ -3,6 +3,7 @@
 //
 
 #include <jsoncons/json.hpp>
+#include <jsoncons_ext/jsonpath/jsonpath.hpp>
 
 #include "base/gtest.h"
 #include "base/logging.h"
@@ -35,6 +36,8 @@ TEST_F(JsonTest, Basic) {
 
   json j = json::parse(data);
   EXPECT_TRUE(j.contains("reputons"));
+  jsonpath::json_replace(j, "$.reputons[*].rating", 1.1);
+  EXPECT_EQ(1.1, j["reputons"][0]["rating"].as_double());
 }
 
 }  // namespace dfly
