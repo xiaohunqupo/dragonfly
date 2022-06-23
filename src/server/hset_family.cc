@@ -707,17 +707,23 @@ OpResult<vector<string>> HSetFamily::OpGetAll(const OpArgs& op_args, string_view
       }
     }
   } else {
+    size_t len = hashTypeLength(hset);
+    auto start = absl::GetCurrentTimeNanos();
+    res.resize(len * 2);
+    unsigned index = 0;
     while (hashTypeNext(hi) != C_ERR) {
       if (mask & FIELDS) {
         sds key = (sds)dictGetKey(hi->de);
-        res.emplace_back(key, sdslen(key));
+        res[index++].assign(key, sdslen(key));
       }
 
       if (mask & VALUES) {
         sds val = (sds)dictGetVal(hi->de);
-        res.emplace_back(val, sdslen(val));
+        res[index++].assign(val, sdslen(val));
       }
     }
+    auto end = absl::GetCurrentTimeNanos();
+    VLOG(1) << "Took " << (end - start) / 1000 << " usec";
   }
 
   hashTypeReleaseIterator(hi);
